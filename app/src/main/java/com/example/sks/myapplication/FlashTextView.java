@@ -6,8 +6,11 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
@@ -89,7 +92,10 @@ public class FlashTextView extends TextView {
         VE_HORIZONTAL = mTranslateDistance * 1.f / ANIM_DURATION;
 
         matrix = new Matrix();
-        mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.lc_bg_sweep);
+        Drawable drawable = getResources().getDrawable(R.drawable.rectangle_bg);
+
+        //mBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.lc_bg_sweep);
+        mBitmap = drawableToBitmap(drawable);
         paint = new Paint();
         paint.setAntiAlias(true);
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_ATOP));
@@ -112,5 +118,24 @@ public class FlashTextView extends TextView {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.drawBitmap(mBitmap, matrix, paint);
+    }
+
+
+    public Bitmap drawableToBitmap(Drawable drawable) {
+        // 取 drawable 的长宽
+        int w = drawable.getIntrinsicWidth();
+        int h = drawable.getIntrinsicHeight();
+
+        // 取 drawable 的颜色格式
+        Bitmap.Config config = drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888
+                : Bitmap.Config.RGB_565;
+        // 建立对应 bitmap
+        Bitmap bitmap = Bitmap.createBitmap(w, h, config);
+        // 建立对应 bitmap 的画布
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, w, h);
+        // 把 drawable 内容画到画布中
+        drawable.draw(canvas);
+        return bitmap;
     }
 }
